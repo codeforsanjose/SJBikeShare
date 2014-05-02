@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.ico">
+
+    <title>San Jose Bike Share</title>
+
+    <!-- CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <link href="css/mydc.css" rel="stylesheet">
+
+     <!-- JavaScript -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="js/bootstrap.js"></script>
+    <script src="js/d3.min.js"></script>
+    <script src="js/crossfilter.min.js"></script>
+    <script src="js/dc.min.js"></script>
+
+  </head>
+
+  <body>
+
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Bike Share in San Jose</a>
+        </div>
+        <div class="navbar-collapse collapse">
+        </div><!--/.navbar-collapse -->
+      </div>
+    </div>
+
+    <!-- Main jumbotron for a primary marketing message or call to action -->
+    <div class="jumbotron">
+      <div class="container">
+        <h2>Curious about San Jose's bike share patterns?</h2>      
+      </div>
+    </div>
+
+    <div class="container">
+      <!-- row of columns -->
+       <div class="row">
+        <h2>Overview</h2>
+        <div class="col-md-8">
+          <p>This site enables you to explore <a href="https://bayareabikeshare.com/">BayAreaBikeShare</a> trip data from San Jose for September 2013 through February 2014. By clicking on different parts of the charts, you can filter and explore patterns for specific user types, days of the week, time of day and beginning/end points.</p> 
+          <aside>These graphs were built by <a href="http://twitter.com/michellethong">Michelle Thong</a> using <a href="http://d3js.org/">d3.js</a>, <a href="http://square.github.io/crossfilter/">crossfilter.js</a> and <a href="http://nickqizhu.github.io/dc.js/">dc.js</a>. They are based on <a href="http://transitized.com/divvyexplorer/">Divvy Explorer</a> and <a href="http://transitized.com/divvyspokes/">Divvy Spokes</a> by transitized and <a href="http://bost.ocks.org/mike/uberdata/">Uber Rides</a> by Mike Bostock.</aside>
+          <br>
+      </footer>
+          </div>
+          <div class="col-md-4"> 
+            <a class="reset" href="javascript:dc.filterAll();dc.redrawAll();"><button type="button" class="btn btn-success">Reset graphs</button></a>
+          </div>
+        </div>
+      <div class="row">
+   
+        <div class="col-md-3" id="chart-pie-user">
+          <h4>Trips by User Type</h4>
+          <p>Click on the pie chart to explore trips for annual subscribers or short-term customers.</p>
+        </div>
+        <div class="col-md-3" id="chart-row-dayofweek">
+          <h4>Trips by Day of Week</h4>
+          <p>Click on a day to explore travel patterns for that specific day.</p>
+       </div>
+        <div class="col-md-6"id="chart-timeofday">
+          <h4>Trips by Time of Day</h4>
+          <p>What times of the day are most popular for trips? The display is filtered based on your selections on the charts to the left.</p>
+        </div>
+        <br>
+      </div>
+
+       <div class="row">
+        <h2>Trips by Origin and Destination</h2>
+          <p>These charts show which stations are most popular as the start and end points. Click on a station to isolate trips from or to that station.</p>
+        <div class="col-md-6" id="chart-row-startstation">
+          <h4>Starting Point</h4>
+          <p> </p>
+        </div>
+        <div class="col-md-6" id="chart-row-endstation">
+          <h4>End Point</h4>
+          <p></p>
+       </div>
+<hr>
+    <div class="col-md-12" id="chart-row-endstation">
+<h1>San Jose Bike Share Rides by Station</h1>
+          <p>This "chord" graph is another way to show the relationships between different bike share stations. The thicker the lines connecting two stations, the more trips there are between those two stations. Roll your cursor over the chart to isolate the trips to and from a given station.</p> 
+        <script src="js/chord.js"></script>
+      </div>
+
+      <hr>
+          </div> <!-- /container -->
+</body>
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+/* Load data */
+d3.csv("data/sjtrips_feb2014.csv", function (data) {
+    /* specify desired formats for dates and numbers */
+    var dateFormat = d3.time.format("%m/%d/%Y %H:%M");
+    var numberFormat = d3.format(".2f");
+
+    /* format the dates */
+    data.forEach(function (d) {
+        d.start_time = dateFormat.parse(d.start_time); // parse string into a date
+        d.end_time = dateFormat.parse(d.end_time); // parse string into a date
+    //    console.log("Start: " + d.start_time);
+        d.start_hour = d3.time.hour(d.start_time);
+        d.duration = Math.round(d.duration/60);
+    });
+
+    // Create crossfilter dimensions
+
+    var ndx = crossfilter(data);
+    var all = ndx.groupAll();
+
+    var dateDim = ndx.dimension(function(d) {
+        return d.start_time; // Need to define start_date above
+    });
+
+    // dimension by start and end station
+    var startDim = ndx.dimension(function(d) {
+        return d.start_stn;
+    });
+
+    var endDim = ndx.dimension(function(d) {
+        return d.end_stn;
+    });
+
+    // group by start and end station
+    var startGroup = startDim.group().reduceCount(function(d){
+        return d.total;
+    });
+
+    var endGroup = endDim.group().reduceCount(function(d){
+        return d.total;
+    });
+
+
+    // dimension by day of week
+    // note: getDay() is a JS function that returns a number 0-6 
+    var dayOfWeek = ndx.dimension(function(d) {
+        var day = d.start_time.getDay();
+        var name=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+        return day+"."+name[day]; 
+    });
+
+    // group by day of week
+    var dayOfWeekGroup = dayOfWeek.group().reduceCount(function(d) {
+        return d.total;
+    });
+
+    // dimension by month
+    var monthDim = ndx.dimension(function(d) {
+        var month = d.start_time.getMonth();
+        var name = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+        return name[month];
+    });
+
+    // group by month
+    var monthGroup = monthDim.group().reduceCount(function(d) {
+        return d.total;
+    });
+
+    // dimension by time of day bike was taken from dock
+    var startTimeDim = ndx.dimension(function(d) {
+        return d.start_time.getHours();
+    });
+
+    // group by start time
+    var startTimeGroup = startTimeDim.group().reduceCount(function(d) {
+        return d.total;
+    });
+
+    // dimensionby type of user
+    var userDim = ndx.dimension(function(d) {
+        return d.user;
+    });
+
+    // group by user
+    var userGroup = userDim.group().reduceCount(function (d) {
+        return d.total;
+    });
+
+  //  console.log("By user type:");
+  //  console.log(userGroup.top(Infinity));
+
+    // create the charts
+    var startChart = dc.rowChart("#chart-row-startstation"); 
+    var endChart = dc.rowChart("#chart-row-endstation"); 
+    var dayOfWeekChart = dc.rowChart("#chart-row-dayofweek"); 
+ //   var monthChart = dc.rowChart("#chart-row-month"); 
+    var userChart = dc.pieChart("#chart-pie-user"); 
+    var timeOfDayChart = dc.barChart("#chart-timeofday"); 
+
+ //   var monthChart = dc.barChart("#chart-row-month"); // month chart
+
+    var isElasticOn = false;
+
+     var dayOfWeekColors = ["#fde0dd","#fa9fb5","#e7e1ef","#d4b9da","#c994c7","#fcc5c0","#df65b0"];
+
+
+     userChart
+        .width(200)
+        .height(200)
+        .dimension(userDim)
+        .group(userGroup)
+        .innerRadius(50)
+        .ordinalColors(['#FF800E','#FCC40A']); // FCC40A bcbd22
+
+
+
+    dayOfWeekChart
+        .width(250).height(250)
+        .margins({top: 20, left: 20, right: 20, bottom: 20})
+        .group(dayOfWeekGroup)
+        .dimension(dayOfWeek)
+        .label(function (d) {
+            return d.key.split(".")[1];
+        })
+        .title(function(d){
+            return d.value;
+        })
+        .colors(d3.scale.category10())
+
+        .elasticX(isElasticOn)
+        .xAxis().ticks(4);
+
+     timeOfDayChart
+        .width(400)
+        .height(250)
+        .margins({top: 10, left: 20, right: 20, bottom: 20})
+        .dimension(startTimeDim)
+        .group(startTimeGroup)
+        .x(d3.scale.linear().domain([0, 24]))
+        .xAxis().tickFormat(
+            function (v) { return v + ":00"; });
+
+    startChart
+        .width(500)
+        .height(450)
+        .margins({top: 0, left: 10, right: 10, bottom: 20})
+        .group(startGroup)
+        .dimension(startDim)
+        .colors(d3.scale.category10())
+        .label(function(d){
+              return d.key;
+          })
+        .elasticX(isElasticOn)
+        .xAxis().ticks(4);
+
+
+
+endChart
+        .width(500)
+        .height(450)
+        .margins({top: 0, left: 10, right: 10, bottom: 20})
+        .group(endGroup)
+        .dimension(endDim)
+        .colors(d3.scale.category10())
+        .label(function(d){
+              return d.key;
+          })
+        .elasticX(isElasticOn)
+        .xAxis().ticks(4)
+
+
+
+/* monthChart
+        .width(300).height(200)
+        .margins({top: 20, left: 10, right: 10, bottom: 20})
+        .group(monthGroup)
+        .dimension(monthDim)
+        .title(function(d){
+            return d.value;})
+      .label(function(d){
+        console.log(d.key);
+            return d.key;
+        })
+        .elasticX(isElasticOn)
+        .xAxis().ticks(4);
+*/
+
+
+
+
+
+    dc.renderAll();
+
+});
+
+
+
+    </script>
+
+
+</html>
