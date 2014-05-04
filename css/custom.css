@@ -1,0 +1,36 @@
+body {
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+
+
+.jumbotron {
+    margin-bottom: 0px;
+    background-image: url("bike_station_mlk.jpg");
+    background-position: 0% 25%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    text-shadow: 2px 2px #111111;
+    height: 300px;
+}
+
+
+#circle circle {
+  fill: none;
+  pointer-events: all;
+}
+
+.group path {
+  fill-opacity: 1;
+}
+
+path.chord {
+  stroke: #000;
+  stroke-width: 0.25px;
+}
+
+#circle:hover path.fade {
+  display:none;
+}
+}

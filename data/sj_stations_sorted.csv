@@ -1,0 +1,11 @@
+station_id,name,lat,long,dockcount,city,installation,color
+13,St James Park,37.339301,-121.889937,15,San Jose,8/6/13,#05A40A
+10,SJ City Hall,37.337391,-121.886995,15,San Jose,8/6/13,#23669C
+11,MLK Library,37.335885,-121.88566,19,San Jose,8/6/13,#FC0A7F
+16,SJSU San Salvador at 9th,37.333955,-121.877349,15,San Jose,8/7/13,#50056B12,SJSU 4th at San Carlos,37.332808,-121.883891,19,San Jose,8/7/13,#29AB8D7,Paseo de San Antonio,37.333798,-121.886943,15,San Jose,8/7/13,#E86900
+8,San Salvador at 1st,37.330165,-121.885831,15,San Jose,8/5/13,#669C22
+3,SJ Civic Center,37.330698,-121.888979,15,San Jose,8/5/13,#00E8FF5,Adobe on Almaden,37.331415,-121.8932,19,San Jose,8/5/13,#9C2266
+2,Diridon Station,37.329732,-121.901782,27,San Jose,8/6/13,#e4190014,SAP Center,37.332692,-121.900084,19,San Jose,8/5/13,#008492
+4,Santa Clara at Almaden,37.333988,-121.894902,11,San Jose,8/6/13,#f0b800
+6,San Pedro Square,37.336721,-121.894074,15,San Jose,8/7/13,#9D46D4
+9,Japantown,37.348742,-121.894715,15,San Jose,8/5/13,#FFE245
